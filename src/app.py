@@ -1,10 +1,13 @@
-from config import TOKEN
+import config
 from discord.ext import commands
 from tinydb import TinyDB, Query
 from random import randint
 
 bot = commands.Bot(command_prefix='ql')
 db = TinyDB('../db/quotes.json')
+
+async def is_owner(ctx):
+    return ctx.author.id == config.OWNER
 
 @bot.event
 async def on_ready():
@@ -24,4 +27,14 @@ async def quote(ctx, user = None, msg = None):
     print('{0}: {1}'.format(user, msg))
     await ctx.send('La citation a été ajouté au lexique.')
 
-bot.run(TOKEN)
+@bot.command()
+@commands.check(is_owner)
+async def info(ctx):
+    nb_quote = db.count(Query().id.exists())
+    await ctx.send('Nombre de citations : {0}'.format(nb_quote))
+
+@info.error
+async def info_error(ctx, error):
+    await ctx.send('Pas de tes affaires.')
+
+bot.run(config.TOKEN)
