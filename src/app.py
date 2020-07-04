@@ -23,4 +23,8 @@ async def quote(ctx, user = None, msg = None):
     print('{0}: {1}'.format(user, msg))
     await ctx.send('La citation a été ajouté au lexique.')
 
+@quote.error()
+async def quote_error(ctx, error):
+    await ctx.send('Usage: qlquote [user] [message]')
+
 bot.run(TOKEN)
