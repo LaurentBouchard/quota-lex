@@ -14,7 +14,8 @@ async def on_ready():
 async def quote(ctx, user = None, msg = None):
     nb_quote = db.count(Query().id.exists())
     if user == None or msg == None:
-        quote_id = randint(0, nb_quote)
+        quote_id = randint(0, nb_quote-1)
+        print('qid{0}'.format(quote_id))
         quote = db.get(Query().id == quote_id)
         await ctx.send('{0} a déjà dit : {1}'.format(quote['user'], quote['msg']))
         return
@@ -22,9 +23,5 @@ async def quote(ctx, user = None, msg = None):
     db.insert({'id': nb_quote, 'user': user, 'msg': msg})
     print('{0}: {1}'.format(user, msg))
     await ctx.send('La citation a été ajouté au lexique.')
-
-@quote.error()
-async def quote_error(ctx, error):
-    await ctx.send('Usage: qlquote [user] [message]')
 
 bot.run(TOKEN)
