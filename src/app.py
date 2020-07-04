@@ -1,12 +1,26 @@
 from config import TOKEN
-import discord
+from discord.ext import commands
+from tinydb import TinyDB, Query
+from random import randint
 
-class QuotaLex(discord.Client):
-    async def on_ready(self):
-        print('Logged as {0}'.format(self.user))
+bot = commands.Bot(command_prefix='ql')
+db = TinyDB('../db/quotes.json')
 
-    async def on_message(self, message):
-        print('Message from {0.author}: {0.content}'.format(message))
+@bot.event
+async def on_ready():
+    print('Logged as {0}'.format(bot.user))
 
-client = QuotaLex()
-client.run(TOKEN)
+@bot.command()
+async def quote(ctx, user = None, msg = None):
+    nb_quote = db.count(Query().id.exists())
+    if user == None or msg == None:
+        quote_id = randint(0, nb_quote)
+        quote = db.get(Query().id == quote_id)
+        await ctx.send('{0} a déjà dit : {1}'.format(quote['user'], quote['msg']))
+        return
+
+    db.insert({'id': nb_quote, 'user': user, 'msg': msg})
+    print('{0}: {1}'.format(user, msg))
+    await ctx.send('La citation a été ajouté au lexique.')
+
+bot.run(TOKEN)
