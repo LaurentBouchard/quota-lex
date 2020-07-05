@@ -1,4 +1,5 @@
 import config
+import discord
 from discord.ext import commands
 from tinydb import TinyDB, Query
 from random import randint
@@ -12,6 +13,7 @@ async def is_owner(ctx):
 @bot.event
 async def on_ready():
     print('Logged as {0}'.format(bot.user))
+    await bot.change_presence(activity=discord.Game("{0} quotes on {1} servers".format(db.count(Query().id.exists()), len(bot.guilds))))
 
 @bot.command()
 async def quote(ctx, user = None, msg = None):
