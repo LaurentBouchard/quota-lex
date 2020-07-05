@@ -15,23 +15,24 @@ async def on_ready():
 
 @bot.command()
 async def quote(ctx, user = None, msg = None):
-    nb_quote = db.count(Query().id.exists())
+    nb_quote = db.count(Query().guild == ctx.guild.id)
     if user == None or msg == None:
         quote_id = randint(0, nb_quote-1)
         print('qid{0}'.format(quote_id))
-        quote = db.get(Query().id == quote_id)
+        quote = db.get((Query().id == quote_id) & (Query().guild == ctx.guild.id))
         await ctx.send('{0} a déjà dit : {1}'.format(quote['user'], quote['msg']))
         return
 
-    db.insert({'id': nb_quote, 'user': user, 'msg': msg})
-    print('{0}: {1}'.format(user, msg))
+    db.insert({'id': nb_quote, 'user': user, 'msg': msg, 'guild': ctx.guild.id})
+    print('[{0}] {1}: {2}'.format(ctx.guild.id, user, msg))
     await ctx.send('La citation a été ajouté au lexique.')
 
 @bot.command()
 @commands.check(is_owner)
 async def info(ctx):
     nb_quote = db.count(Query().id.exists())
-    await ctx.send('Nombre de citations : {0}'.format(nb_quote))
+    nb_guild = len(bot.guilds)
+    await ctx.send('Nombre de citations : {0}\nNombre de serveurs : {1}'.format(nb_quote, nb_guild))
 
 @info.error
 async def info_error(ctx, error):
