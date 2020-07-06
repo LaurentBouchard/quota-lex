@@ -29,6 +29,10 @@ async def quote(ctx, user = None, msg = None):
         await ctx.send('{0} a déjà dit : {1}'.format(quote['user'], quote['msg']))
         return
 
+    message = msg.content
+    for attachment in msg.attachments:
+        message += '\n' + attachment.url
+
     db.insert({'id': nb_quote, 'user': user, 'msg': msg, 'guild': ctx.guild.id})
     print('[{0}] {1}: {2}'.format(ctx.guild.id, user, msg))
     await ctx.send('La citation a été ajouté au lexique.')
@@ -40,6 +44,8 @@ async def last(ctx):
     last_message = (await ctx.history(limit=2).flatten())[1]
     user = last_message.author.mention
     msg = last_message.content
+    for attachment in last_message.attachments:
+        msg += '\n' + attachment.url
 
     db.insert({'id': nb_quote, 'user': user, 'msg': msg, 'guild': ctx.guild.id})
     print('[{0}] {1}: {2}'.format(ctx.guild.id, user, msg))
