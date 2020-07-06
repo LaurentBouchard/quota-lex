@@ -29,9 +29,9 @@ async def quote(ctx, user = None, msg = None):
         await ctx.send('{0} a déjà dit : {1}'.format(quote['user'], quote['msg']))
         return
 
-    message = msg.content
-    for attachment in msg.attachments:
-        message += '\n' + attachment.url
+    message = (await ctx.history(limit=1).flatten())[0]
+    for attachment in message.attachments:
+        msg += '\n' + attachment.url
 
     db.insert({'id': nb_quote, 'user': user, 'msg': msg, 'guild': ctx.guild.id})
     print('[{0}] {1}: {2}'.format(ctx.guild.id, user, msg))
