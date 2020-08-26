@@ -1,5 +1,6 @@
 import config
 import discord, asyncio
+import random
 from discord.ext import commands
 from tinydb import TinyDB, Query
 from random import randint
@@ -21,19 +22,23 @@ async def presence_task():
         await asyncio.sleep(60)
 
 @bot.command()
-async def quote(ctx, user = None, msg = None):
+async def quote(ctx, user:discord.Member = None, *, msg = None):
     nb_quote = db.count(Query().guild == ctx.guild.id)
-    if user == None or msg == None:
+    if msg == None:
+        if user is not None:
+            mention = user.mention
+            quote = random.choice(db.search((Query().user == user.mention)))
+            return await ctx.send(f"{quote['user']} a déjà dit : {quote['msg']}")
+        
         quote_id = randint(0, nb_quote-1)
         quote = db.get((Query().id == quote_id) & (Query().guild == ctx.guild.id))
-        await ctx.send('{0} a déjà dit : {1}'.format(quote['user'], quote['msg']))
-        return
+        return await ctx.send('{0} a déjà dit : {1}'.format(quote['user'], quote['msg']))
 
     message = (await ctx.history(limit=1).flatten())[0]
     for attachment in message.attachments:
         msg += '\n' + attachment.url
 
-    db.insert({'id': nb_quote, 'user': user, 'msg': msg, 'guild': ctx.guild.id})
+    db.insert({'id': nb_quote, 'user': user.mention, 'msg': msg, 'guild': ctx.guild.id})
     print('[{0}] {1}: {2}'.format(ctx.guild.id, user, msg))
     await ctx.send('La citation a été ajouté au lexique.')
 

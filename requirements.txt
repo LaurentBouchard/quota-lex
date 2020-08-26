@@ -1,0 +1,2 @@
+﻿tinydb
+discord.py
