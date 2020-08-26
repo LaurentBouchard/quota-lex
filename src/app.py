@@ -28,7 +28,6 @@ async def quote(ctx, user:discord.Member = None, *, msg = None):
         if user is not None:
             mention = user.mention
             quote = random.choice(db.search((Query().user == user.mention)))
-            print(quote)
             return await ctx.send(f"{quote['user']} a déjà dit : {quote['msg']}")
         
         quote_id = randint(0, nb_quote-1)
